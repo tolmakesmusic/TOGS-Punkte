@@ -1058,12 +1058,35 @@ function updateModeration(team, own, opponent, remaining, lockedWinner) {
   const valueEl = $("modValue" + (team + 1));
   const noteEl = $("modNote" + (team + 1));
 
-  // Bei insgesamt 66 Punkten gewinnt ein Team
-  // mit 34 Punkten sicher.
-  const winningScore = 34;
+  /*
+    remaining = Punkte, die aus noch offenen Spielen
+    noch vergeben werden können.
 
-  // Hat das Team bereits 34 oder mehr Punkte,
-  // ist es uneinholbar.
+    Die bereits gespielten Unentschieden sind dabei
+    schon aus dem Gesamt-Punktepool herausgerechnet.
+  */
+
+  // Gesamtzahl der Punkte, die überhaupt noch von
+  // beiden Teams erreicht werden können:
+  const totalAchievable = own + opponent + remaining;
+
+  /*
+    Für einen sicheren Sieg braucht ein Team mehr als
+    die Hälfte aller erreichbaren Punkte.
+
+    Beispiel:
+    66 erreichbare Punkte -> 34 nötig
+    63 erreichbare Punkte -> 32 nötig
+    60 erreichbare Punkte -> 31 nötig
+  */
+  const winningScore =
+    Math.floor(totalAchievable / 2) + 1;
+
+
+  /*
+    Hat das Team die notwendige Punktzahl bereits erreicht,
+    ist es uneinholbar.
+  */
   if (own >= winningScore) {
 
     valueEl.textContent = "0 Punkte";
@@ -1074,26 +1097,16 @@ function updateModeration(team, own, opponent, remaining, lockedWinner) {
     return;
   }
 
+
   /*
-    Berechnung:
-
-    34 Punkte werden für den sicheren Sieg benötigt.
-    Bereits vorhandene Punkte werden abgezogen.
-
-    Beispiel:
-    Team hat 1 Punkt
-    34 - 1 = 33 Punkte noch nötig
+    Wie viele Punkte braucht das Team noch?
   */
   const need = winningScore - own;
 
 
   /*
-    "remaining" enthält nur die Punkte,
-    die aus noch nicht gespielten Spielen
-    tatsächlich noch vergeben werden können.
-
-    Unentschiedene Spiele sind darin NICHT mehr enthalten,
-    weil sie bereits gespielt wurden.
+    Falls die benötigten Punkte aus den noch offenen Spielen
+    nicht mehr erreicht werden können.
   */
   if (need > remaining) {
 
@@ -1101,13 +1114,15 @@ function updateModeration(team, own, opponent, remaining, lockedWinner) {
       "Nicht mehr möglich";
 
     noteEl.textContent =
-      "34 Punkte können nicht mehr erreicht werden";
+      "Ein sicherer Sieg ist nicht mehr erreichbar";
 
     return;
   }
 
 
-  // Normale Anzeige
+  /*
+    Normale Anzeige
+  */
   valueEl.textContent =
     need + (need === 1 ? " Punkt" : " Punkte");
 

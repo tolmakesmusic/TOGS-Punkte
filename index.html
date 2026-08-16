@@ -1053,86 +1053,67 @@
 
   }
 
+function updateModeration(team, own, opponent, remaining, lockedWinner) {
 
-  function updateModeration(
-    team,
-    own,
-    opponent,
-    remaining,
-    lockedWinner
-  ) {
+  const valueEl = $("modValue" + (team + 1));
+  const noteEl = $("modNote" + (team + 1));
 
-    const valueEl =
-      $("modValue" + (team + 1));
+  // Bei insgesamt 66 Punkten gewinnt ein Team
+  // mit 34 Punkten sicher.
+  const winningScore = 34;
 
-    const noteEl =
-      $("modNote" + (team + 1));
+  // Hat das Team bereits 34 oder mehr Punkte,
+  // ist es uneinholbar.
+  if (own >= winningScore) {
 
+    valueEl.textContent = "0 Punkte";
 
-    if (lockedWinner) {
+    noteEl.textContent =
+      "Bereits uneinholbar 🏆";
 
-      valueEl.textContent =
-        "GEWONNEN 🏆";
-
-      noteEl.textContent =
-        "Mehr als die Hälfte der noch möglichen Punkte";
-
-      return;
-    }
-
-
-    if (remaining === 0) {
-
-      valueEl.textContent =
-        own === opponent
-          ? "GLEICHSTAND"
-          : (
-              own > opponent
-                ? "GEWONNEN 🏆"
-                : "VERLOREN"
-            );
-
-      noteEl.textContent =
-        "Alle Spiele sind gespielt";
-
-      return;
-    }
-
-
-    const majority =
-      Math.floor(remaining / 2) + 1;
-
-
-    const need =
-      Math.max(
-        0,
-        majority - own
-      );
-
-
-    if (need <= 0) {
-
-      valueEl.textContent =
-        "0 Punkte";
-
-      noteEl.textContent =
-        "Bereits uneinholbar";
-
-    } else {
-
-      valueEl.textContent =
-        need +
-        (
-          need === 1
-            ? " Punkt"
-            : " Punkte"
-        );
-
-      noteEl.textContent =
-        "Noch nötig für mehr als die Hälfte";
-    }
-
+    return;
   }
+
+  /*
+    Berechnung:
+
+    34 Punkte werden für den sicheren Sieg benötigt.
+    Bereits vorhandene Punkte werden abgezogen.
+
+    Beispiel:
+    Team hat 1 Punkt
+    34 - 1 = 33 Punkte noch nötig
+  */
+  const need = winningScore - own;
+
+
+  /*
+    "remaining" enthält nur die Punkte,
+    die aus noch nicht gespielten Spielen
+    tatsächlich noch vergeben werden können.
+
+    Unentschiedene Spiele sind darin NICHT mehr enthalten,
+    weil sie bereits gespielt wurden.
+  */
+  if (need > remaining) {
+
+    valueEl.textContent =
+      "Nicht mehr möglich";
+
+    noteEl.textContent =
+      "34 Punkte können nicht mehr erreicht werden";
+
+    return;
+  }
+
+
+  // Normale Anzeige
+  valueEl.textContent =
+    need + (need === 1 ? " Punkt" : " Punkte");
+
+  noteEl.textContent =
+    "Noch nötig für einen sicheren Sieg";
+}
 
 
   function score(team) {
